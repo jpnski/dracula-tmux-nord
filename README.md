@@ -2,6 +2,8 @@
 
 ### Appearance:
 
+![screenshot](screenshot.png)
+
 ### Changes:
 * Supports overriding more powerline visual elements in `tmux.conf`, in the same way as plugins like `git` or `cpu-usage`
   * Falls back to default Dracula colors if no overrides applied
@@ -28,6 +30,8 @@
 
 ### Nord Color Theme
 ```bash
+# ~/.config/tmux/tmux.conf
+
 # Define Nord Colors
 set -g @dracula-colors "
 nord_dark1='#4C566A'    aurora_red='#BF616A'
@@ -42,7 +46,27 @@ nord_frost3='#81A1C1'   nord_snow3='#D8DEE9'
 nord_frost4='#5E81AC'
 "
 
+# Nord Re-coloring
+set -g @dracula-powerline-bg        "nord_dark4"
 
+set -g @dracula-left-icon-bg        "nord_dark3"
+set -g @dracula-left-icon-fg        "nord_frost3"
+
+set -g @dracula-left-icon-prefix-bg "aurora_orange"
+set -g @dracula-left-icon-prefix-fg "nord_dark4"
+
+set -g @dracula-active-window-bg    "aurora_purple"
+set -g @dracula-active-window-fg    "nord_dark4"
+
+set -g @dracula-inactive-window-bg  "nord_dark1"
+set -g @dracula-inactive-window-fg  "nord_frost3"
+
+set -g @dracula-flags-active-fg     "nord_snow1"
+set -g @dracula-flags-inactive-fg   "nord_dark4"
+
+set -g @dracula-git-colors          "nord_dark1 nord_frost3"
+set -g @dracula-cpu-usage-colors    "nord_dark2 nord_frost3"
+set -g @dracula-ram-usage-colors    "nord_dark3 nord_frost3"
 ```
 
 ## License
