@@ -427,6 +427,7 @@ main() {
 
     if [ "${inactive_window_bg}" != "${bg_color}" ]; then
       # Custom inactive bg: add powerline separators so inactive windows get the same chevron shape as active windows
+      tmux set-window-option -g window-status-separator ""
       tmux set-window-option -g window-status-format "#[fg=${bg_color}]#[bg=${inactive_window_bg}]${left_sep}#[fg=${inactive_window_fg}]#[bg=${inactive_window_bg}] #I #W${flags} #[fg=${inactive_window_bg}]#[bg=${bg_color}]${left_sep}"
     else
       tmux set-window-option -g window-status-format "#[fg=${inactive_window_fg}]#[bg=${inactive_window_bg}] #I #W${flags}"
