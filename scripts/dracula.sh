@@ -86,10 +86,12 @@ main() {
   left_icon_bg=$(resolve_color "$(get_tmux_option "@dracula-left-icon-bg" "green")")
   left_icon_fg=$(resolve_color "$(get_tmux_option "@dracula-left-icon-fg" "dark_gray")")
   left_icon_prefix_bg=$(resolve_color "$(get_tmux_option "@dracula-left-icon-prefix-bg" "yellow")")
+  left_icon_prefix_fg=$(resolve_color "$(get_tmux_option "@dracula-left-icon-prefix-fg" "dark_gray")")
   active_window_bg=$(resolve_color "$(get_tmux_option "@dracula-active-window-bg" "dark_purple")")
   active_window_fg=$(resolve_color "$(get_tmux_option "@dracula-active-window-fg" "white")")
   window_title_fg=$(resolve_color "$(get_tmux_option "@dracula-window-title-fg" "white")")
   powerline_bg=$(resolve_color "$(get_tmux_option "@dracula-powerline-bg" "gray")")
+  inactive_window_bg_name=$(get_tmux_option "@dracula-inactive-window-bg" "")
 
   # Set transparency variables - Colors and window dividers
   if $transparent_powerline_bg; then
@@ -114,6 +116,13 @@ main() {
       window_sep_bg=${active_window_bg}
       window_sep="$show_left_sep"
     fi
+  fi
+
+  # Resolve inactive window bg after bg_color is computed, so it falls back to bg_color
+  if [ -n "$inactive_window_bg_name" ]; then
+    inactive_window_bg=$(resolve_color "$inactive_window_bg_name")
+  else
+    inactive_window_bg=${bg_color}
   fi
 
   # Handle left icon configuration
@@ -195,13 +204,13 @@ main() {
   # Status left
   if $show_powerline; then
     if $show_edge_icons; then
-      tmux set-option -g status-left "#[bg=${bg_color}]#[fg=${left_icon_bg}]#[bold]#{?client_prefix,#[fg=${left_icon_prefix_bg}],}${show_right_sep}#[bg=${left_icon_bg}]#[fg=${left_icon_fg}]#{?client_prefix,#[bg=${left_icon_prefix_bg}],} ${left_icon} #[fg=${left_icon_bg}]#[bg=${bg_color}]#{?client_prefix,#[fg=${left_icon_prefix_bg}],}${left_sep} "
+      tmux set-option -g status-left "#[bg=${bg_color}]#[fg=${left_icon_bg}]#[bold]#{?client_prefix,#[fg=${left_icon_prefix_bg}],}${show_right_sep}#[bg=${left_icon_bg}]#[fg=${left_icon_fg}]#{?client_prefix,#[bg=${left_icon_prefix_bg}]#[fg=${left_icon_prefix_fg}],} ${left_icon} #[fg=${left_icon_bg}]#[bg=${bg_color}]#{?client_prefix,#[fg=${left_icon_prefix_bg}],}${left_sep} "
     else
-      tmux set-option -g status-left "#[bg=${dark_gray}]#[fg=${left_icon_bg}]#[bg=${left_icon_bg}]#[fg=${left_icon_fg}]#{?client_prefix,#[bg=${left_icon_prefix_bg}],} ${left_icon} #[fg=${left_icon_bg}]#[bg=${bg_color}]#{?client_prefix,#[fg=${left_icon_prefix_bg}],}${left_sep}"
+      tmux set-option -g status-left "#[bg=${dark_gray}]#[fg=${left_icon_bg}]#[bg=${left_icon_bg}]#[fg=${left_icon_fg}]#{?client_prefix,#[bg=${left_icon_prefix_bg}]#[fg=${left_icon_prefix_fg}],} ${left_icon} #[fg=${left_icon_bg}]#[bg=${bg_color}]#{?client_prefix,#[fg=${left_icon_prefix_bg}],}${left_sep}"
     fi
     powerbg=${bg_color}
   else
-    tmux set-option -g status-left "#[bg=${left_icon_bg}]#[fg=${left_icon_fg}]#{?client_prefix,#[bg=${left_icon_prefix_bg}],} ${left_icon}"
+    tmux set-option -g status-left "#[bg=${left_icon_bg}]#[fg=${left_icon_fg}]#{?client_prefix,#[bg=${left_icon_prefix_bg}]#[fg=${left_icon_prefix_fg}],} ${left_icon}"
   fi
 
   # Status right
@@ -417,7 +426,7 @@ main() {
     tmux set-window-option -g window-status-current-format "#[fg=${active_window_fg}]#[bg=${active_window_bg}] #I #W${current_flags} "
   fi
 
-  tmux set-window-option -g window-status-format "#[fg=${window_title_fg}]#[bg=${bg_color}] #I #W${flags}"
+  tmux set-window-option -g window-status-format "#[fg=${window_title_fg}]#[bg=${inactive_window_bg}] #I #W${flags}"
   tmux set-window-option -g window-status-activity-style "bold"
   tmux set-window-option -g window-status-bell-style "bold"
 }
