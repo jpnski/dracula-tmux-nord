@@ -89,7 +89,7 @@ main() {
   left_icon_prefix_fg=$(resolve_color "$(get_tmux_option "@dracula-left-icon-prefix-fg" "dark_gray")")
   active_window_bg=$(resolve_color "$(get_tmux_option "@dracula-active-window-bg" "dark_purple")")
   active_window_fg=$(resolve_color "$(get_tmux_option "@dracula-active-window-fg" "white")")
-  window_title_fg=$(resolve_color "$(get_tmux_option "@dracula-window-title-fg" "white")")
+  inactive_window_fg=$(resolve_color "$(get_tmux_option "@dracula-inactive-window-fg" "white")")
   powerline_bg=$(resolve_color "$(get_tmux_option "@dracula-powerline-bg" "gray")")
   inactive_window_bg_name=$(get_tmux_option "@dracula-inactive-window-bg" "")
 
@@ -422,11 +422,17 @@ main() {
   # Window option
   if $show_powerline; then
     tmux set-window-option -g window-status-current-format "#[fg=${window_sep_fg}]#[bg=${window_sep_bg}]${window_sep}#[fg=${active_window_fg}]#[bg=${active_window_bg}] #I #W${current_flags} #[fg=${active_window_bg}]#[bg=${bg_color}]${left_sep}"
+
+    if [ "${inactive_window_bg}" != "${bg_color}" ]; then
+      # Custom inactive bg: add powerline separators so inactive windows get the same chevron shape as active windows
+      tmux set-window-option -g window-status-format "#[fg=${bg_color}]#[bg=${inactive_window_bg}]${left_sep}#[fg=${inactive_window_fg}]#[bg=${inactive_window_bg}] #I #W${flags} #[fg=${inactive_window_bg}]#[bg=${bg_color}]${left_sep}"
+    else
+      tmux set-window-option -g window-status-format "#[fg=${inactive_window_fg}]#[bg=${inactive_window_bg}] #I #W${flags}"
+    fi
   else
     tmux set-window-option -g window-status-current-format "#[fg=${active_window_fg}]#[bg=${active_window_bg}] #I #W${current_flags} "
+    tmux set-window-option -g window-status-format "#[fg=${inactive_window_fg}]#[bg=${inactive_window_bg}] #I #W${flags}"
   fi
-
-  tmux set-window-option -g window-status-format "#[fg=${window_title_fg}]#[bg=${inactive_window_bg}] #I #W${flags}"
   tmux set-window-option -g window-status-activity-style "bold"
   tmux set-window-option -g window-status-bell-style "bold"
 }
