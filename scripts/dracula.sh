@@ -90,6 +90,8 @@ main() {
   active_window_bg=$(resolve_color "$(get_tmux_option "@dracula-active-window-bg" "dark_purple")")
   active_window_fg=$(resolve_color "$(get_tmux_option "@dracula-active-window-fg" "white")")
   inactive_window_fg=$(resolve_color "$(get_tmux_option "@dracula-inactive-window-fg" "white")")
+  flags_inactive_fg=$(resolve_color "$(get_tmux_option "@dracula-flags-inactive-fg" "dark_purple")")
+  flags_active_fg=$(resolve_color "$(get_tmux_option "@dracula-flags-active-fg" "light_purple")")
   powerline_bg=$(resolve_color "$(get_tmux_option "@dracula-powerline-bg" "gray")")
   inactive_window_bg_name=$(get_tmux_option "@dracula-inactive-window-bg" "")
 
@@ -169,8 +171,8 @@ main() {
       flags=""
       current_flags="";;
     true)
-      flags="#{?window_flags,#[fg=${dark_purple}]#{window_flags},}"
-      current_flags="#{?window_flags,#[fg=${light_purple}]#{window_flags},}"
+      flags="#{?window_flags,#[fg=${flags_inactive_fg}]#{window_flags},}"
+      current_flags="#{?window_flags,#[fg=${flags_active_fg}]#{window_flags},}"
   esac
 
   # sets refresh interval to every 5 seconds

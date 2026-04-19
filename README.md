@@ -1,74 +1,49 @@
-# Dracula for [tmux](https://github.com/tmux/tmux/wiki)
+# Dracula Tmux Nord
 
-> A dark theme for [tmux](https://github.com/tmux/tmux/wiki)
+### Appearance:
 
-![Screenshot](./screenshot.png)
+### Changes:
+* Supports overriding more powerline visual elements in `tmux.conf`, in the same way as plugins like `git` or `cpu-usage`
+  * Falls back to default Dracula colors if no overrides applied
+* Made for cohesion with `nord_minimal` Vim Airline and `nordic_nvim` Neovim theme
 
-## Install
+---
 
-All instructions can be found [in the docs](./INSTALL.md).
+### Added Overrides
 
-## Configuration
+| Option | Default | Description |
+|--------|---------|-------------|
+| `@dracula-left-icon-bg` | green | Left icon background |
+| `@dracula-left-icon-fg` | dark_gray | Left icon foreground |
+| `@dracula-left-icon-prefix-bg` | yellow | Prefix indicator background |
+| `@dracula-left-icon-prefix-fg` | dark_gray | Prefix indicator foreground |
+| `@dracula-active-window-bg` | dark_purple | Active window background |
+| `@dracula-active-window-fg` | white | Active window foreground |
+| `@dracula-inactive-window-bg` | (inherits) | Inactive window background |
+| `@dracula-inactive-window-fg` | white | Inactive window foreground |
+| `@dracula-flags-active-fg` | light_purple | Window flags (active) foreground |
+| `@dracula-flags-inactive-fg` | dark_purple | Window flags (inactive) foreground |
+| `@dracula-powerline-bg` | gray | Powerline background |
 
-Configuration and options can be found [in the docs](/docs/CONFIG.md).
 
-## Color Theming
+### Nord Color Theme
+```bash
+# Define Nord Colors
+set -g @dracula-colors "
+nord_dark1='#4C566A'    aurora_red='#BF616A'
+nord_dark2='#434C5E'    aurora_orange='#D08770'
+nord_dark3='#3B4252'    aurora_yellow='#EBCB8B'
+nord_dark4='#2E3440'    aurora_green='#A3BE8C'
+nord_dark5='#242933'    aurora_purple='#B48EAD'
 
-In depth configuration of Colors and alternative themes can be found [in the docs](/docs/color_theming/README.md)
+nord_frost1='#8FBCBB'   nord_snow1='#ECEFF4'
+nord_frost2='#88C0D0'   nord_snow2='#E5E9F0'
+nord_frost3='#81A1C1'   nord_snow3='#D8DEE9'
+nord_frost4='#5E81AC'
+"
 
-## Features
 
-- Support for powerline
-- Support for NerdFonts
-- Day, date, time, timezone
-- [Fully custom color theming](/docs/color_theming/README.md)
-- Current location based on network with temperature and forecast icon (if available)
-- SSH session user, hostname and port of active tmux pane
-- Network connection status, bandwidth, SSID and public IP (requires `curl`)
-- Git branch and status
-- Battery percentage and AC power connection status with icons
-- Refresh rate control
-- CPU usage (percentage or load average)
-- CPU architecture
-- RAM usage (system and/or tmux server)
-- Custom status texts from external scripts
-- GPU stats
-    - usage, power draw, and VRAM usage for NVIDIA on Linux, with partial support for amd/ intel
-    - usage, and power draw for MacOS. **requires sudo privileges**
-- Color code based on whether a prefix is active or not
-- List of windows with the current window highlighted
-- When prefix is enabled, the left status bar widget turns from green to yellow
-- If forecast information is available, a ☀, ☁, ☂, or ❄ unicode character corresponding with the forecast is displayed alongside the temperature
-- Read system temperature
-- Read system uptime
-- Info if the Panes are synchronized
-- Spotify playback (needs the tool spotify-tui installed). max-len can be configured.
-- Music Player Daemon status (needs the tool mpc installed)
-- Playerctl, get current track metadata
-- Current kubernetes context
-- Countdown to tmux-continuum save
-- Current working directory of tmux pane
-- Kerberos TGT expiration date
-- Show your Libre Freestyle 3 readings [Setup instructions](./scripts/libre.sh)
-
-## Compatibility
-
-Compatible with macOS and Linux. Tested on tmux 3.1b
-FreeBSD compatibility is in development
-
-## Team
-
-This theme is maintained by the following person(s) and a bunch of [awesome contributors](https://github.com/dracula/tmux/graphs/contributors).
-
-| [![Ethan Edwards](https://avatars1.githubusercontent.com/u/60861925?s=70&v=4)](https://github.com/ethancedwards8) | [![Hugo Meinhof](https://avatars.githubusercontent.com/u/19731833?s=70&v=4)](https://github.com/theoreticallyhugo) | [![Dane Williams](https://avatars2.githubusercontent.com/u/22798229?s=70&v=4)](https://github.com/danerwilliams) |
-|-------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------|
-| [Ethan Edwards](https://github.com/ethancedwards8)                                                                | [Hugo Meinhof](https://github.com/theoreticallyhugo)                                                               | [Dane Williams](https://github.com/danerwilliams)                                                                |
-
-## Community
-
-- [Twitter](https://twitter.com/draculatheme) - Best for getting updates about themes and new stuff.
-- [GitHub](https://github.com/dracula/dracula-theme/discussions) - Best for asking questions and discussing issues.
-- [Discord](https://draculatheme.com/discord-invite) - Best for hanging out with the community.
+```
 
 ## License
 
