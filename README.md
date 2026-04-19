@@ -1,15 +1,38 @@
 # Dracula Tmux Nord
 
+Stripped down version of Dracula Tmux, recolored with Nord palette
+
 ### Appearance:
 
 ![screenshot](screenshot.png)
 
 ### Changes:
-* Supports overriding more powerline visual elements in `tmux.conf`, in the same way as plugins like `git` or `cpu-usage`
+* Removed many plugins and their configuration code
+* Supports overriding more powerline visual elements in `tmux.conf`
+  * Defines Nord theme palettes in config file, and applies the overrides
   * Falls back to default Dracula colors if no overrides applied
 * Made for cohesion with `nord_minimal` Vim Airline and `nordic_nvim` Neovim theme
 
 ---
+
+### Available Powerline Plugins
+
+| Plugin | Description |
+|--------|-------------|
+| `git` | Git status |
+| `cpu-usage` | CPU usage |
+| `ram-usage` | RAM usage |
+| `gpu-usage` | GPU usage |
+| `gpu-ram-usage` | GPU RAM |
+| `krbtgt` | Kerberos ticket |
+| `kubernetes-context` | Kubernetes context |
+| `terraform` | Terraform workspace |
+| `continuum` | Continuum backup |
+| `attached-clients` | Connected clients |
+| `ssh-session` | SSH session |
+| `uptime` | System uptime |
+| `synchronize-panes` | Sync panes |
+| `custom:<script>` | Run custom script |
 
 ### Added Overrides
 
