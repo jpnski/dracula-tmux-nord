@@ -279,6 +279,32 @@ main() {
 
   done
 
+  # Window bell configuration
+  window_bell=$(get_tmux_option "@dracula-window-bell" false)
+  if [ "$window_bell" = "true" ]; then
+    window_bell_blink=$(get_tmux_option "@dracula-window-bell-blink" true)
+    window_bell_fg=$(resolve_color "$(get_tmux_option "@dracula-window-bell-fg" "dark_gray")")
+    window_bell_bg=$(resolve_color "$(get_tmux_option "@dracula-window-bell-bg" "yellow")")
+
+    # Build bell-aware flags
+    case $show_flags in
+      true)  bell_flags="#{?window_flags,#[fg=${window_bell_fg}]#{window_flags},}";;
+      *)     bell_flags="";;
+    esac
+
+    if [ "$window_bell_blink" = "true" ]; then
+      blink_on="#[blink]"
+      blink_off="#[noblink]"
+    else
+      blink_on=""
+      blink_off=""
+    fi
+
+    tmux set-option -g bell-action other
+    tmux set-option -g monitor-bell on
+    tmux set-option -g visual-bell off
+  fi
+
   # Window option
   if $show_powerline; then
     tmux set-window-option -g window-status-current-format "#[fg=${window_sep_fg}]#[bg=${window_sep_bg}]${window_sep}#[fg=${active_window_fg}]#[bg=${active_window_bg}] #I #W${current_flags} #[fg=${active_window_bg}]#[bg=${bg_color}]${left_sep}"
@@ -286,16 +312,38 @@ main() {
     if [ "${inactive_window_bg}" != "${bg_color}" ]; then
       # Custom inactive bg: add powerline separators so inactive windows get the same chevron shape as active windows
       tmux set-window-option -g window-status-separator ""
-      tmux set-window-option -g window-status-format "#[fg=${bg_color}]#[bg=${inactive_window_bg}]${left_sep}#[fg=${inactive_window_fg}]#[bg=${inactive_window_bg}] #I #W${flags} #[fg=${inactive_window_bg}]#[bg=${bg_color}]${left_sep}"
+      normal_fmt="#[fg=${bg_color}]#[bg=${inactive_window_bg}]${left_sep}#[fg=${inactive_window_fg}]#[bg=${inactive_window_bg}] #I #W${flags} #[fg=${inactive_window_bg}]#[bg=${bg_color}]${left_sep}"
+      if [ "$window_bell" = "true" ]; then
+        bell_fmt="#[fg=${bg_color}]#[bg=${window_bell_bg}]${left_sep}#[fg=${window_bell_fg}]#[bg=${window_bell_bg}]${blink_on} #I #W${bell_flags} #[fg=${window_bell_bg}]#[bg=${bg_color}]${blink_off}${left_sep}"
+        tmux set-window-option -g window-status-format "#{?window_bell_flag,${bell_fmt},${normal_fmt}}"
+      else
+        tmux set-window-option -g window-status-format "${normal_fmt}"
+      fi
     else
-      tmux set-window-option -g window-status-format "#[fg=${inactive_window_fg}]#[bg=${inactive_window_bg}] #I #W${flags}"
+      normal_fmt="#[fg=${inactive_window_fg}]#[bg=${inactive_window_bg}] #I #W${flags}"
+      if [ "$window_bell" = "true" ]; then
+        bell_fmt="#[fg=${window_bell_fg}]#[bg=${window_bell_bg}]${blink_on} #I #W${bell_flags}${blink_off}"
+        tmux set-window-option -g window-status-format "#{?window_bell_flag,${bell_fmt},${normal_fmt}}"
+      else
+        tmux set-window-option -g window-status-format "${normal_fmt}"
+      fi
     fi
   else
     tmux set-window-option -g window-status-current-format "#[fg=${active_window_fg}]#[bg=${active_window_bg}] #I #W${current_flags} "
-    tmux set-window-option -g window-status-format "#[fg=${inactive_window_fg}]#[bg=${inactive_window_bg}] #I #W${flags}"
+    normal_fmt="#[fg=${inactive_window_fg}]#[bg=${inactive_window_bg}] #I #W${flags}"
+    if [ "$window_bell" = "true" ]; then
+      bell_fmt="#[fg=${window_bell_fg}]#[bg=${window_bell_bg}]${blink_on} #I #W${bell_flags}${blink_off}"
+      tmux set-window-option -g window-status-format "#{?window_bell_flag,${bell_fmt},${normal_fmt}}"
+    else
+      tmux set-window-option -g window-status-format "${normal_fmt}"
+    fi
   fi
   tmux set-window-option -g window-status-activity-style "bold"
-  tmux set-window-option -g window-status-bell-style "bold"
+  if [ "$window_bell" = "true" ]; then
+    tmux set-window-option -g window-status-bell-style "none"
+  else
+    tmux set-window-option -g window-status-bell-style "bold"
+  fi
 }
 
 # run main function
