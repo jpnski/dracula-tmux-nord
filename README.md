@@ -1,6 +1,6 @@
 # Dracula Tmux Nord
 
-Stripped down version of Dracula Tmux, recolored with Nord palette
+Stripped down version of Dracula Tmux, recolored with Nord palette, with added visual notifications
 
 ### Appearance:
 
@@ -36,7 +36,7 @@ Stripped down version of Dracula Tmux, recolored with Nord palette
 | `synchronize-panes` | Sync panes |
 | `custom:<script>` | Run custom script |
 
-### Added Overrides
+### Added Color Overrides
 
 | Option | Default | Description |
 |--------|---------|-------------|
@@ -52,11 +52,12 @@ Stripped down version of Dracula Tmux, recolored with Nord palette
 | `@dracula-flags-inactive-fg` | dark_purple | Window flags (inactive) foreground |
 | `@dracula-powerline-bg` | gray | Powerline background |
 
-### Window Bell
+### Window Bell Visual Notification
 
 Highlights inactive window tabs when a bell fires in that window (e.g. a
-background process completing). When enabled, the tab recolors with configurable
-bell colors. Text blinking can be toggled independently.
+background process completing). When enabled, the tab recolors with a configurable
+bg color. Text blinking can be toggled independently.
+* Window title fg blinking depends on terminal emulator's OSC5 implementation (works in Gnome/Kitty terminals, does not work in Alacritty/Foot terminals)
 
 | Option | Default | Description |
 |--------|---------|-------------|
@@ -66,7 +67,7 @@ bell colors. Text blinking can be toggled independently.
 | `@dracula-window-bell-bg` | yellow | Bell highlight background |
 
 
-### Claude Window Bell Hook Config
+#### Claude Window Bell Hook Config
 ```bash
 ...
   "hooks": {
@@ -85,7 +86,49 @@ bell colors. Text blinking can be toggled independently.
 ...
 ```
 
-### Nord Color Theme
+#### Opencode Window Bell Plugin Config
+Using a simple plugin in `~/.config/opencode/plugins/notify-bell.js` to emulate the Claude Code `hook > match > command` behavior that rings a term bell in response to user-prompt-required events.
+
+This plugin can be toggled on/off in the TUI Settings/Plugins menu, requires defining it in `opencode.json` and `tui.json`:
+* `plugin:["file:///home/{user}/.config/opencode/plugins/notify-bell.json"]`
+
+```javascript
+const ENABLED_EVENTS = new Set([
+  'permission.asked',
+  'question.asked',
+  'session.error',
+])
+
+const DEBOUNCE_MS = 1200
+
+export default {
+  id: "notify-bell",
+  tui: async (api) => {
+    const bell = '\x07'
+    const last = new Map()
+
+    const ring = (key, now = Date.now()) => {
+      const prev = last.get(key) || 0
+      if (now - prev < DEBOUNCE_MS) return
+      last.set(key, now)
+      process.stdout.write(bell)
+    }
+
+    for (const eventType of ENABLED_EVENTS) {
+      api.event.on(eventType, (event) => {
+        const key = event.properties?.sessionID
+          ? `${event.type}:${event.properties.sessionID}`
+          : event.type
+        ring(key)
+      })
+    }
+  },
+}
+
+```
+
+
+### Example Theme + Bell `tmux.conf`
 ```bash
 # ~/.config/tmux/tmux.conf
 
