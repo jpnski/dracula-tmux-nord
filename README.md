@@ -90,7 +90,7 @@ bg color. Text blinking can be toggled independently.
 Using a simple plugin in `~/.config/opencode/plugins/notify-bell.js` to emulate the Claude Code `hook > match > command` behavior that rings a term bell in response to user-prompt-required events.
 
 This plugin can be toggled on/off in the TUI Settings/Plugins menu, requires defining it in `opencode.json` and `tui.json`:
-* `plugin:["file:///home/{user}/.config/opencode/plugins/notify-bell.json"]`
+* `plugin:["file:///home/{user}/.config/opencode/plugins/notify-bell.js"]`
 
 ```javascript
 const ENABLED_EVENTS = new Set([
