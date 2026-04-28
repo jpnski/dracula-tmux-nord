@@ -4,7 +4,7 @@ Stripped down version of Dracula Tmux, recolored with Nord palette, with added v
 
 ### Appearance:
 
-![screenshot](screenshot.png)
+![appearance](output.avif)
 
 ### Changes:
 * Supports overriding more powerline visual elements in `tmux.conf`
