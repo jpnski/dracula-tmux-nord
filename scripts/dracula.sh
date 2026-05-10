@@ -63,7 +63,9 @@ main() {
   # Override default colors and possibly add more
   colors="$(get_tmux_option "@dracula-colors" "")"
   if [ -n "$colors" ]; then
-    eval "$colors"
+    if [[ "$colors" =~ ^([a-z_][a-z0-9_]*='#[0-9A-Fa-f]{6}'(\s+[a-z_][a-z0-9_]*='#[0-9A-Fa-f]{6}')*|")$ ]]; then
+      eval "$colors"
+    fi
   fi
 
   # Resolve theme element color overrides (users set variable names, not hex values)

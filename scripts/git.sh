@@ -12,60 +12,118 @@ IFS=' ' read -r -a show_remote_status <<< $(get_tmux_option "@dracula-git-show-r
 show_repo_name="$(get_tmux_option "@dracula-git-show-repo-name" "false")"
 git_truncate_length="$(get_tmux_option "@dracula-git-truncate-length" "")"
 
-# Get added, modified, updated and deleted files from git status
+GIT_DIR=""
+
 getChanges()
 {
-   declare -i added=0;
-   declare -i modified=0;
-   declare -i updated=0;
-   declare -i deleted=0;
+    local added=0
+    local modified=0
+    local updated=0
+    local deleted=0
 
-for i in $(git -C $path --no-optional-locks status -s)
+    local git_out
+    git_out=$(git --git-dir="$GIT_DIR" --no-optional-locks status -s 2>/dev/null)
+    [ -z "$git_out" ] && echo "" && return
 
+    for i in $git_out
     do
-      case $i in 
-      'A')
-        added+=1 
-      ;;
-      'M')
-        modified+=1
-      ;;
-      'U')
-        updated+=1 
-      ;;
-      'D')
-       deleted+=1
-      ;;
-
+      case $i in
+      'A') added=$((added + 1)) ;;
+      'M') modified=$((modified + 1)) ;;
+      'U') updated=$((updated + 1)) ;;
+      'D') deleted=$((deleted + 1)) ;;
       esac
     done
 
-    output=""
+    local output=""
     [ $added -gt 0 ] && output+="${added}A"
     [ $modified -gt 0 ] && output+=" ${modified}M"
     [ $updated -gt 0 ] && output+=" ${updated}U"
     [ $deleted -gt 0 ] && output+=" ${deleted}D"
-  
-    echo $output    
+
+    echo $output
 }
 
-
-# getting the #{pane_current_path} from dracula.sh is no longer possible
 getPaneDir()
 {
- nextone="false"
- for i in $(tmux list-panes -F "#{pane_active} #{pane_current_path}");
- do
-    if [ "$nextone" == "true" ]; then
-       echo $i
-       return
-    fi 
-    if [ "$i" == "1" ]; then
-        nextone="true"
-    fi
-  done
+    local pane_path=""
+    local nextone="false"
+    for i in $(tmux list-panes -F "#{pane_active} #{pane_current_path}");
+    do
+        if [ "$nextone" == "true" ]; then
+            pane_path="$i"
+            break
+        fi
+        if [ "$i" == "1" ]; then
+            nextone="true"
+        fi
+    done
+    sanitize_git_path "$pane_path"
 }
 
+checkForGitDir()
+{
+    [ -n "$GIT_DIR" ] && [ -d "$GIT_DIR" ] && [ -r "$GIT_DIR/HEAD" ] && echo "true" || echo "false"
+}
+
+checkForChanges()
+{
+    [ "$no_untracked_files" == "false" ] && no_untracked="" || no_untracked="-uno"
+    if [ "$(checkForGitDir)" == "true" ]; then
+        if [ "$(git --git-dir="$GIT_DIR" --no-optional-locks status -s $no_untracked 2>/dev/null)" != "" ]; then
+            echo "true"
+        else
+            echo "false"
+        fi
+    else
+        echo "false"
+    fi
+}
+
+getBranch()
+{
+    if [ "$(checkForGitDir)" == "true" ]; then
+        echo "$(git --git-dir="$GIT_DIR" rev-parse --abbrev-ref HEAD 2>/dev/null)"
+    else
+        echo "$no_repo_message"
+    fi
+}
+
+getRemoteInfo()
+{
+    local head_ref
+    head_ref=$(git --git-dir="$GIT_DIR" symbolic-ref -q HEAD 2>/dev/null)
+    [ -z "$head_ref" ] && echo "" && return
+
+    local base
+    base=$(git --git-dir="$GIT_DIR" for-each-ref --format='%(upstream:short) %(upstream:track)' "$head_ref" 2>/dev/null)
+    [ -z "$base" ] && echo "" && return
+
+    local remote
+    remote=$(echo "$base" | awk '{print $1}')
+    local out=""
+
+    if [ -n "$remote" ]; then
+        out="...$remote"
+        local ahead behind
+        ahead=$(echo "$base" | grep -Eo 'ahead[[:space:]]+[[:digit:]]+' | awk '{print $2}')
+        behind=$(echo "$base" | grep -Eo 'behind[[:space:]]+[[:digit:]]+' | awk '{print $2}')
+        [ -n "$ahead" ] && out+=" +$ahead"
+        [ -n "$behind" ] && out+=" -$behind"
+    fi
+
+    echo "$out"
+}
+
+getRepoName()
+{
+    if [ "$show_repo_name" = "true" ] && [ "$(checkForGitDir)" = "true" ]; then
+        local repo
+        repo="$(git --git-dir="$GIT_DIR" --no-optional-locks rev-parse --show-toplevel 2>/dev/null)"
+        repo="$(basename "$repo")"
+        echo "$repo | "
+    fi
+}
 
 # check if the current or diff symbol is empty to remove ugly padding
 checkEmptySymbol()
@@ -76,67 +134,6 @@ checkEmptySymbol()
     else
         echo "false"
     fi
-}
-
-# check to see if the current repo is not up to date with HEAD
-checkForChanges()
-{
-    [ $no_untracked_files == "false" ] && no_untracked="" || no_untracked="-uno"
-    if [ "$(checkForGitDir)" == "true" ]; then
-        if [ "$(git -C $path --no-optional-locks status -s $no_untracked)" != "" ]; then
-            echo "true"
-        else
-            echo "false"
-        fi
-    else
-        echo "false"
-    fi
-}     
-
-# check if a git repo exists in the directory
-checkForGitDir()
-{
-    if [ "$(git -C $path rev-parse --abbrev-ref HEAD)" != "" ]; then
-        echo "true"
-    else
-        echo "false"
-    fi
-}
-
-# return branch name if there is one
-getBranch()
-{   
-    if [ $(checkForGitDir) == "true" ]; then
-        echo $(git -C $path rev-parse --abbrev-ref HEAD)
-    else
-        echo $no_repo_message
-    fi
-}
-
-getRemoteInfo()
-{
-    base=$(git -C $path for-each-ref --format='%(upstream:short) %(upstream:track)' "$(git -C $path symbolic-ref -q HEAD)")
-    remote=$(echo "$base" | cut -d" " -f1)
-    out=""
-
-    if [ -n "$remote" ]; then
-        out="...$remote"
-        ahead=$(echo "$base" | grep -E -o 'ahead[ [:digit:]]+' | cut -d" " -f2)
-        behind=$(echo "$base" | grep -E -o 'behind[ [:digit:]]+' | cut -d" " -f2)
-
-        [ -n "$ahead" ] && out+=" +$ahead"
-        [ -n "$behind" ] && out+=" -$behind"
-    fi
-
-    echo "$out"
-}
-
-getRepoName()
-{
-  if [ "$show_repo_name" = "true" ] && [ "$(checkForGitDir)" = "true" ]; then
-    repo="$(basename "$(git -C "$path" --no-optional-locks rev-parse --show-toplevel 2>/dev/null)")"
-    echo "$repo | "
-  fi
 }
 
 # return the final message for the status bar
@@ -182,8 +179,12 @@ getMessage()
 }
 
 main()
-{  
-    path=$(getPaneDir)
+{
+    local pane_path
+    pane_path=$(getPaneDir)
+    if [ -n "$pane_path" ]; then
+        GIT_DIR="$(cd "$pane_path/.git" 2>/dev/null && pwd)"
+    fi
     getMessage
 }
 
