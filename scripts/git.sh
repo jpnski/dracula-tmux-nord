@@ -48,16 +48,15 @@ getPaneDir()
 {
     local pane_path=""
     local nextone="false"
-    for i in $(tmux list-panes -F "#{pane_active} #{pane_current_path}");
-    do
+    while IFS=$'\t' read -r active path; do
         if [ "$nextone" == "true" ]; then
-            pane_path="$i"
+            pane_path="$path"
             break
         fi
-        if [ "$i" == "1" ]; then
+        if [ "$active" == "1" ]; then
             nextone="true"
         fi
-    done
+    done < <(tmux list-panes -F "#{pane_active}	#{pane_current_path}" 2>/dev/null)
     sanitize_git_path "$pane_path"
 }
 

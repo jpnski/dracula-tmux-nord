@@ -28,10 +28,13 @@ main()
   OUTPUT_STRING=""
   if [ -z "$principal" ]; then
     OUTPUT_STRING="no principal configured"
+    echo "${label:+$label $OUTPUT_STRING}"
+    sleep $RATE
+    return
   fi
 
   if [ -z "$krb_tgt_expire" ]; then
-      OUTPUT_STRING="$principal -"
+      OUTPUT_STRING="${principal} -"
   else
       OUTPUT_STRING="${principal} ${krb_tgt_expire}"
   fi
