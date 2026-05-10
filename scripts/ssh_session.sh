@@ -23,7 +23,7 @@ parse_ssh_config() {
   for ssh_config in `awk '
     $1 == "Host" {
       gsub("\\\\.", "\\\\.", $2);
-      gsub("\\\\*", ".*", $2);
+      gsub("\\*", ".*", $2);
       host = $2;
       next;
     }
@@ -63,18 +63,39 @@ get_ssh_user() {
 }
 
 get_remote_info() {
-  local command=$1
+  local pane_pid=$(tmux display-message -p "#{pane_pid}")
+  local cmd=""
+  for pid in $(pgrep -P "$pane_pid" 2>/dev/null); do
+    local proc_cmd=$(ps -o command= -p "$pid" 2>/dev/null)
+    if echo "$proc_cmd" | grep -q "ssh "; then
+      cmd="$proc_cmd"
+      break
+    fi
+  done
+  if [ -z "$cmd" ]; then
+    cmd=$(ps -o command= -p "$pane_pid" 2>/dev/null)
+  fi
 
-  # First get the current pane command pid to get the full command with arguments
-  local cmd=$({ pgrep -flaP `tmux display-message -p "#{pane_pid}"` ; ps -o command -p `tmux display-message -p "#{pane_pid}"` ; } | xargs -I{} echo {} | grep ssh | sed -E 's/^[0-9]*[[:blank:]]*ssh //')
   local port=$(parse_ssh_port "$cmd")
+  cmd=$(echo $cmd | sed 's/\-p\s*'"$port"'//g')
 
-  local cmd=$(echo $cmd|sed 's/\-p\s*'"$port"'//g')
-  local user=$(echo $cmd | awk '{print $NF}'|cut -f1 -d@)
-  local host=$(echo $cmd | awk '{print $NF}'|cut -f2 -d@)
+  local target=""
+  for arg in $cmd; do
+    if [ "$arg" != "ssh" ] && [[ "$arg" != -* ]]; then
+      target="$arg"
+    fi
+  done
 
-  if [ $user == $host ]; then
-    local user=$(get_ssh_user $host)
+  local user=""
+  local host="$target"
+  if echo "$target" | grep -q "@"; then
+    local user_host_pair="$target"
+    local user="${user_host_pair%@*}"
+    local host="${user_host_pair#*@}"
+  fi
+
+  if [ -z "$user" ] || [ "$user" == "$host" ]; then
+    user=$(get_ssh_user "$host")
   fi
 
   case "$1" in
