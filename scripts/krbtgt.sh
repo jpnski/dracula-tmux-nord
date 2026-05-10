@@ -13,7 +13,7 @@ if [ -n "$principal" ]; then
   if ! [[ "$_principal" =~ "@" ]]; then
     _principal="$_principal@"
   fi
-  krb_principal_tgt_cache=$(klist -lan | awk -v krb_principal="^$_principal" '$0 ~ krb_principal {print $2}')
+  krb_principal_tgt_cache=$(klist -lan | awk -v krb_principal="^$(escape_awk_regex "$_principal")" '$0 ~ krb_principal {print $2}')
   if [ -n "$krb_principal_tgt_cache" ]; then
     krb_tgt_expire=$(date '+%H:%M:%S' -d "$(klist $krb_principal_tgt_cache | awk '/krbtgt/ {print $3,$4}')")
   else

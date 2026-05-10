@@ -41,3 +41,8 @@ sanitize_git_path() {
   echo "$abs_path"
 }
 
+escape_awk_regex() {
+  local str="$1"
+  printf '%s' "$str" | sed 's/[][().*+?^${}|/\-]/\\&/g'
+}
+
