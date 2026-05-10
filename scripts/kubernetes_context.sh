@@ -11,6 +11,11 @@ label=$5
 current_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $current_dir/utils.sh
 
+if ! command -v kubectl >/dev/null 2>&1; then
+    echo "kubectl not found"
+    exit 1
+fi
+
 current_context=$(kubectl config view --minify --output 'jsonpath={.current-context}'; echo)
 current_user=$(kubectl config view --minify --output 'jsonpath={.contexts[?(@.name=="'$current_context'")].context.user}'; echo)
 current_cluster=$(kubectl config view --minify --output 'jsonpath={.contexts[?(@.name=="'$current_context'")].context.cluster}'; echo)

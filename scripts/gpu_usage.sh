@@ -19,9 +19,10 @@ get_platform()
         if [[ -n $gpu ]]; then
           # if a gpu is detected, return it
           echo $gpu
-        elif type -a nvidia-smi >> /dev/null; then
-          # if no gpu was detected, and nvidia-smi is installed, we'll still try nvidia
+        elif command -v nvidia-smi >/dev/null 2>&1; then
           echo "NVIDIA"
+        elif [ -e /sys/class/drm/card?/device/gpu_busy_percent ]; then
+          echo "Advanced"
         fi
       fi
       ;;

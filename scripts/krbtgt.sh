@@ -8,17 +8,16 @@ label=$2
 current_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $current_dir/utils.sh
 
+krb_tgt_expire=""
 if [ -n "$principal" ]; then
-  _principal=$principal
-  if ! [[ "$_principal" =~ "@" ]]; then
-    _principal="$_principal@"
-  fi
-  krb_principal_tgt_cache=$(klist -lan | awk -v krb_principal="^$(escape_awk_regex "$_principal")" '$0 ~ krb_principal {print $2}')
-  if [ -n "$krb_principal_tgt_cache" ]; then
-    krb_tgt_expire=$(date '+%H:%M:%S' -d "$(klist $krb_principal_tgt_cache | awk '/krbtgt/ {print $3,$4}')")
-  else
-    krb_tgt_expire=""
-  fi
+    local _principal=$principal
+    if ! [[ "$_principal" =~ "@" ]]; then
+        _principal="$_principal@"
+    fi
+    local krb_principal_tgt_cache=$(klist -lan | awk -v krb_principal="^$(escape_awk_regex "$_principal")" '$0 ~ krb_principal {print $2}')
+    if [ -n "$krb_principal_tgt_cache" ]; then
+        krb_tgt_expire=$(date '+%H:%M:%S' -d "$(klist $krb_principal_tgt_cache | awk '/krbtgt/ {print $3,$4}')")
+    fi
 fi
 
 main()
