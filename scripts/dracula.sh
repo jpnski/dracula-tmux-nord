@@ -264,7 +264,7 @@ main() {
 
     # edge styling
     if $show_edge_icons; then
-      right_edge_icon="#[bg=${bg_color}]#[fg=${!colors[0]}]${show_left_sep}"
+      right_edge_icon="#[bg=${bg_color}]#[fg=${!colors[0]}]${show_right_sep}"
       background_color=${bg_color}
     else
       background_color=${powerbg}
@@ -277,14 +277,14 @@ main() {
       if $show_empty_plugins; then
         tmux set-option -ga status-right " #[fg=${!colors[0]}]#[bg=${background_color}]#[nobold]#[nounderscore]#[noitalics]${right_sep}#[fg=${!colors[1]}]#[bg=${!colors[0]}]$pad_script$right_edge_icon"
       else
-        tmux set-option -ga status-right "#{?#{==:$script,},,#[fg=${!colors[0]}]#[nobold]#[nounderscore]#[noitalics]${right_sep}#[fg=${!colors[1]}]#[bg=${!colors[0]}]$pad_script$right_edge_icon}"
+        tmux set-option -ga status-right "#{?#{==:$script,,},#[fg=${!colors[0]}]#[nobold]#[nounderscore]#[noitalics]${right_sep}#[fg=${!colors[1]}]#[bg=${!colors[0]}]$pad_script$right_edge_icon}"
     fi
       powerbg=${!colors[0]}
     else
       if $show_empty_plugins; then
         tmux set-option -ga status-right "#[fg=${!colors[1]}]#[bg=${!colors[0]}]$pad_script"
       else
-        tmux set-option -ga status-right "#{?#{==:$script,},,#[fg=${!colors[1]}]#[bg=${!colors[0]}]$pad_script}"
+        tmux set-option -ga status-right "#{?#{==:$script,,},#[fg=${!colors[1]}]#[bg=${!colors[0]}]$pad_script}"
       fi
     fi
 
